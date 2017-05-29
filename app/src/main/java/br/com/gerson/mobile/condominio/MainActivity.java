@@ -1,13 +1,9 @@
 package br.com.gerson.mobile.condominio;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -16,14 +12,26 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.CalendarView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import br.com.gerson.mobile.condominio.network.DownloadCallback;
-import br.com.gerson.mobile.condominio.network.NetworkFragment;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, DownloadCallback {
+        implements NavigationView.OnNavigationItemSelectedListener {
 
     //private AgendaController agendaController = new AgendaController();
     TextView lblEventosDia;
@@ -31,8 +39,6 @@ public class MainActivity extends AppCompatActivity
     private Integer day;
     private Integer month;
     private Integer year;
-    private NetworkFragment mNetworkFragment;
-    private boolean mDownloading = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,8 +74,11 @@ public class MainActivity extends AppCompatActivity
                 onEscolheData(year, month, dayOfMonth);
             }
         });
-
         lblEventosDia = (TextView) findViewById(R.id.lblEventosDia);
+
+        this.day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+        this.month = Calendar.getInstance().get(Calendar.MONTH);
+        this.year = Calendar.getInstance().get(Calendar.YEAR);
     }
 
     private void onEscolheData(int year, int month, int dayOfMonth) {
@@ -77,9 +86,23 @@ public class MainActivity extends AppCompatActivity
         this.month = month;
         this.day = dayOfMonth;
 
-        mNetworkFragment = NetworkFragment.getInstance(getSupportFragmentManager(),
-                "http://192.168.0.4:8080/datasnap/rest/TServerMethods1/consulta/" + getDataFormatadaYMD(year, month, dayOfMonth));
-        startDownload();
+        RequestQueue queue = Volley.newRequestQueue(this);
+        final String url = "http://192.168.0.4:8080/datasnap/rest/TServerMethods1/consulta/" +
+                getDataFormatadaYMD(year, month, dayOfMonth);
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        lblEventosDia.setText(formataJSON(response));
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(), error.toString(), Toast.LENGTH_SHORT).show();
+            }
+        }
+        );
+        queue.add(request);
     }
 
     @NonNull
@@ -153,55 +176,23 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    private void startDownload() {
-        if (!mDownloading && mNetworkFragment != null) {
-            // Execute the async download.
-            mNetworkFragment.startDownload();
-            mDownloading = true;
+    private String formataJSON(JSONObject jsonObject) {
+        StringBuilder sbResult = new StringBuilder();
+        JSONArray jsonArray = null;
+        try {
+            jsonArray = jsonObject.getJSONArray("result");
+            jsonArray = jsonArray.getJSONArray(0);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject obj = jsonArray.getJSONObject(i);
+                String apto = obj.optString("apto");
+                String bloco = obj.optString("bloco");
+                String descricao = obj.optString("descricao");
+
+                sbResult.append("Reservado Apto: ").append(apto).append("-").append(bloco).append(" ").append(descricao).append('\n');
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-    }
-
-    @Override
-    public void updateFromDownload(String result) {
-        if (result != null) {
-            lblEventosDia.setText(result);
-            getSupportFragmentManager().beginTransaction().remove(mNetworkFragment).commit();
-        } /*else {
-            lblEventosDia.setText("Erro");
-        }*/
-    }
-
-    @Override
-    public NetworkInfo getActiveNetworkInfo() {
-        ConnectivityManager connectivityManager =
-                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        return networkInfo;
-    }
-
-    @Override
-    public void onProgressUpdate(int progressCode, int percentComplete) {
-        switch(progressCode) {
-            // You can add UI behavior for progress updates here.
-            case Progress.ERROR:
-                break;
-            case Progress.CONNECT_SUCCESS:
-                break;
-            case Progress.GET_INPUT_STREAM_SUCCESS:
-                break;
-            case Progress.PROCESS_INPUT_STREAM_IN_PROGRESS:
-                lblEventosDia.setText("" + percentComplete + "%");
-                break;
-            case Progress.PROCESS_INPUT_STREAM_SUCCESS:
-                break;
-        }
-    }
-
-    @Override
-    public void finishDownloading() {
-        mDownloading = false;
-        if (mNetworkFragment != null) {
-            mNetworkFragment.cancelDownload();
-        }
+        return sbResult.toString();
     }
 }
