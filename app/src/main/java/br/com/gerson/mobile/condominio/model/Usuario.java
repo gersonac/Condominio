@@ -4,13 +4,13 @@ package br.com.gerson.mobile.condominio.model;
  * Created by gerson on 18/05/2017.
  */
 
-public class Condomino {
+public class Usuario {
     private Integer id;
     private String nome;
     private Integer apto;
     private String bloco;
 
-    public Condomino(Integer id) {
+    public Usuario(Integer id) {
         this.id = id;
     }
 

@@ -90,11 +90,11 @@ public class PendentesActivity extends AppCompatActivity implements PendenteDial
 
     private ArrayList<Evento> parsePendentes(JSONObject response) {
         ArrayList<Evento> result = new ArrayList<Evento>();
-        Evento evento = new Evento();
         try {
             JSONArray jsonArray = response.getJSONArray("result");
             JSONArray pend = jsonArray.getJSONArray(0);
             for (int i = 0; i < pend.length(); i++) {
+                Evento evento = new Evento();
                 evento.parseJSON(pend.getJSONObject(i));
                 result.add(evento);
             }

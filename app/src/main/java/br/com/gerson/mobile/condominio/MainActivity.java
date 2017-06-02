@@ -1,8 +1,10 @@
 package br.com.gerson.mobile.condominio;
 
+import android.app.DialogFragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -13,7 +15,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.CalendarView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,17 +34,21 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+import br.com.gerson.mobile.condominio.model.Config;
+import br.com.gerson.mobile.condominio.model.Evento;
 
-    //private AgendaController agendaController = new AgendaController();
-    TextView lblEventosDia;
+public class MainActivity extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener, PendenteDialog.PendenteDialogListener {
+
     CalendarView calendarView;
     private Integer day;
     private Integer month;
     private Integer year;
+    private ArrayList<Evento> listaEventosDia = null;
+    private Integer itemSel = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +84,6 @@ public class MainActivity extends AppCompatActivity
                 onEscolheData(year, month, dayOfMonth);
             }
         });
-        lblEventosDia = (TextView) findViewById(R.id.lblEventosDia);
 
         this.day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
         this.month = Calendar.getInstance().get(Calendar.MONTH);
@@ -87,13 +96,13 @@ public class MainActivity extends AppCompatActivity
         this.day = dayOfMonth;
 
         RequestQueue queue = Volley.newRequestQueue(this);
-        final String url = "http://192.168.0.4:8080/datasnap/rest/TServerMethods1/consulta/" +
-                getDataFormatadaYMD(year, month, dayOfMonth);
+        final String url = Config.getConsulta() + getDataFormatadaYMD(year, month, dayOfMonth);
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        lblEventosDia.setText(formataJSON(response));
+                        listaEventosDia = formataJSON(response);
+                        setListaEventosDia(listaEventosDia);
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -105,18 +114,86 @@ public class MainActivity extends AppCompatActivity
         queue.add(request);
     }
 
+    private void setListaEventosDia(final ArrayList<Evento> lista) {
+        ArrayAdapter<Evento> adapter = new ArrayAdapter<Evento>(this, android.R.layout.simple_list_item_2, android.R.id.text1, lista) {
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                TextView text1 = (TextView) view.findViewById(android.R.id.text1);
+                TextView text2 = (TextView) view.findViewById(android.R.id.text2);
+
+                text1.setText(lista.get(position).toString());
+                text2.setText(lista.get(position).getStatus());
+                return view;
+            }
+        };
+        ListView lvEventosDia = (ListView) findViewById(R.id.lv_evento_dia);
+        lvEventosDia.setAdapter(adapter);
+        lvEventosDia.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                itemSel = position;
+                DialogFragment dialogFragment = new PendenteDialog();
+                dialogFragment.show(getFragmentManager(), "pendentes_dialog");
+            }
+        });
+    }
+
+    private ArrayList<Evento> formataJSON(JSONObject jsonObject) {
+        ArrayList<Evento> sbResult = new ArrayList<Evento>();
+                JSONArray jsonArray = null;
+        try {
+            jsonArray = jsonObject.getJSONArray("result");
+            jsonArray = jsonArray.getJSONArray(0);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                Evento evento = new Evento();
+                evento.parseJSON(jsonArray.getJSONObject(i));
+                sbResult.add(evento);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return sbResult;
+    }
+
     @NonNull
     private String getDataFormatada() {
         StringBuilder sb = new StringBuilder();
-        sb.append(day).append("/").append(month+1).append("/").append(year);
+        sb.append(day).append("/").append(month + 1).append("/").append(year);
         return sb.toString();
     }
 
     @NonNull
     private String getDataFormatadaYMD(int year, int month, int dayOfMonth) {
         StringBuilder sb = new StringBuilder();
-        sb.append(year).append(String.format("%02d", month+1)).append(String.format("%02d", dayOfMonth));
+        sb.append(year).append(String.format("%02d", month + 1)).append(String.format("%02d", dayOfMonth));
         return sb.toString();
+    }
+
+    @Override
+    public void onItemClick(DialogFragment dialog, int which) {
+        if (which != 2) {
+            Evento eventoSel= listaEventosDia.get(itemSel);
+            String acao = which == 0 ? "N" : "R";
+            StringBuilder sbUrl = new StringBuilder(Config.getStatusEvento());
+            sbUrl.append(eventoSel.getData()).append("/").append(eventoSel.getApto()).append("/").append(eventoSel.getBloco()).append("/").append(acao);
+
+            RequestQueue queue = Volley.newRequestQueue(this);
+            JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, sbUrl.toString(), null,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            setListaEventosDia(listaEventosDia);
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+
+                }
+            });
+            queue.add(request);
+        }
     }
 
     @Override
@@ -157,42 +234,19 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        if (id == R.id.nav_pendentes) {
+            Intent i = new Intent(this, PendentesActivity.class);
+            this.startActivity(i);
 
+        } else if (id == R.id.nav_login) {
+            Intent i = new Intent(this, LoginActivity.class);
+            this.startActivity(i);
         } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
 
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    private String formataJSON(JSONObject jsonObject) {
-        StringBuilder sbResult = new StringBuilder();
-        JSONArray jsonArray = null;
-        try {
-            jsonArray = jsonObject.getJSONArray("result");
-            jsonArray = jsonArray.getJSONArray(0);
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject obj = jsonArray.getJSONObject(i);
-                String apto = obj.optString("apto");
-                String bloco = obj.optString("bloco");
-                String descricao = obj.optString("descricao");
-
-                sbResult.append("Reservado Apto: ").append(apto).append("-").append(bloco).append(" ").append(descricao).append('\n');
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return sbResult.toString();
     }
 }

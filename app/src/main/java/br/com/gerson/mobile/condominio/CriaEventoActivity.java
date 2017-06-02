@@ -1,30 +1,37 @@
 package br.com.gerson.mobile.condominio;
 
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Locale;
 
-import br.com.gerson.mobile.condominio.R;
-import br.com.gerson.mobile.condominio.model.Evento;
-import br.com.gerson.mobile.condominio.network.DownloadCallback;
-import br.com.gerson.mobile.condominio.network.NetworkFragment;
+import br.com.gerson.mobile.condominio.model.Config;
 
-public class CriaEventoActivity extends AppCompatActivity implements DownloadCallback {
+public class CriaEventoActivity extends AppCompatActivity {
 
     Spinner spnTipoEventos;
     Spinner spnAptos;
-    private NetworkFragment mNetworkFragment;
-    private boolean mDownloading = false;
     String dataEventoYMD = "";
 
     @Override
@@ -49,14 +56,55 @@ public class CriaEventoActivity extends AppCompatActivity implements DownloadCal
         addEvento.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String evento = spnTipoEventos.getSelectedItem().toString();
+                String evento = getEvento();
                 String apto = spnAptos.getSelectedItem().toString();
+                StringBuilder sbUrl = new StringBuilder(Config.getSalva());
+                sbUrl.append(dataEventoYMD).append("/").append(apto).append("/").append(getBloco()).append("/").append(evento);
 
-                mNetworkFragment = NetworkFragment.getInstance(getSupportFragmentManager(),
-                        "http://192.168.0.4:8080/datasnap/rest/TServerMethods1/salva/" + dataEventoYMD + "=" + apto + "|C|" + evento);
-                startDownload();
+                RequestQueue queue = Volley.newRequestQueue(v.getContext());
+                JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, sbUrl.toString(), null,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                Toast.makeText(getApplicationContext(), getResultadoInclusao(response), Toast.LENGTH_SHORT).show();
+                                finish();
+
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(getApplicationContext(), error.toString(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+                );
+                queue.add(request);
             }
         });
+    }
+
+    private String getBloco() {
+        RadioButton rbBlocoA = (RadioButton) this.findViewById(R.id.rbBlocoA);
+        RadioButton rbBlocoB = (RadioButton) this.findViewById(R.id.rbBlocoB);
+        if (rbBlocoA.isChecked())
+            return "A";
+        else if (rbBlocoB.isChecked())
+            return "B";
+        else
+            return "C";
+    }
+
+    private String getEvento() {
+        StringBuilder evento = new StringBuilder();
+        String eventoSel = spnTipoEventos.getSelectedItem().toString();
+        String[] split = eventoSel.split(" ");
+        try {
+            for (String evento1: split) {
+                evento.append(URLEncoder.encode(evento1, "UTF-8")).append(" ");
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return evento.toString().trim();
     }
 
     private ArrayList<String> getListaAptos() {
@@ -67,8 +115,19 @@ public class CriaEventoActivity extends AppCompatActivity implements DownloadCal
         for (Integer i = 1; i <= QTD_ANDARES; i++)
             for (Integer j = 1; j <= APTO_POR_ANDAR; j++)
 
-                aptos.add(String.format("%02d%02d", i, j));
+                aptos.add(String.format(Locale.getDefault(), "%02d%02d", i, j));
         return aptos;
+    }
+
+    private String getResultadoInclusao(JSONObject obj) {
+        try {
+            JSONArray jsonArray = obj.getJSONArray("result");
+            JSONObject mensagem = jsonArray.getJSONObject(0);
+            return mensagem.getString("mensagem");
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return e.toString();
+        }
     }
 
     private ArrayList<String> getTiposEventos() {
@@ -79,42 +138,5 @@ public class CriaEventoActivity extends AppCompatActivity implements DownloadCal
         tipos.add("Evento de vendas");
         tipos.add("Festa de 15 anos");
         return tipos;
-    }
-
-    private void startDownload() {
-        if (!mDownloading && mNetworkFragment != null) {
-            // Execute the async download.
-            mNetworkFragment.startDownload();
-            mDownloading = true;
-        }
-    }
-
-    @Override
-    public void updateFromDownload(String result) {
-        if (result != null) {
-            Toast.makeText(this, result, Toast.LENGTH_SHORT).show();
-            getSupportFragmentManager().beginTransaction().remove(mNetworkFragment).commit();
-        }
-    }
-
-    @Override
-    public NetworkInfo getActiveNetworkInfo() {
-        ConnectivityManager connectivityManager =
-                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        return networkInfo;
-    }
-
-    @Override
-    public void onProgressUpdate(int progressCode, int percentComplete) {
-
-    }
-
-    @Override
-    public void finishDownloading() {
-        mDownloading = false;
-        if (mNetworkFragment != null) {
-            mNetworkFragment.cancelDownload();
-        }
     }
 }
