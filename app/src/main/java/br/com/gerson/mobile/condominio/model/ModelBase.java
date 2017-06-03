@@ -13,13 +13,11 @@ import br.com.gerson.mobile.condominio.persistence.CondominioSQLiteOpenHelper;
  */
 
 public class ModelBase {
-    CondominioSQLiteOpenHelper helper;
-    Context context;
-    protected String TABLE_NAME;
+    private CondominioSQLiteOpenHelper helper;
+    String TABLE_NAME;
     private Integer id;
 
     public ModelBase(Context context) {
-        this.context = context;
         if (context != null)
             helper = new CondominioSQLiteOpenHelper(context);
         TABLE_NAME = "";
@@ -62,6 +60,15 @@ public class ModelBase {
         String[] selectionArgs = { id.toString() };
 
         db.update(TABLE_NAME, getContentValues(), selection, selectionArgs);
+    }
+
+    public void delete() {
+        SQLiteDatabase db = helper.getWritableDatabase();
+
+        String selection = BaseColumns._ID + " = ?";
+        String[] selectionArgs = { id.toString() };
+
+        db.delete(TABLE_NAME, selection, selectionArgs);
     }
 
     public Integer getId() {

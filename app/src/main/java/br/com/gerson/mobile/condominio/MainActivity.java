@@ -37,7 +37,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import br.com.gerson.mobile.condominio.model.Config;
+import br.com.gerson.mobile.condominio.controller.CondominioController;
 import br.com.gerson.mobile.condominio.model.Evento;
 
 public class MainActivity extends AppCompatActivity
@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity
         this.day = dayOfMonth;
 
         RequestQueue queue = Volley.newRequestQueue(this);
-        final String url = Config.getConsulta() + getDataFormatadaYMD(year, month, dayOfMonth);
+        final String url = new CondominioController(this).getUrlConsulta(getDataFormatadaYMD(year, month, dayOfMonth));
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
                 new Response.Listener<JSONObject>() {
                     @Override
@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity
 
     private ArrayList<Evento> formataJSON(JSONObject jsonObject) {
         ArrayList<Evento> sbResult = new ArrayList<Evento>();
-                JSONArray jsonArray = null;
+        JSONArray jsonArray = null;
         try {
             jsonArray = jsonObject.getJSONArray("result");
             jsonArray = jsonArray.getJSONArray(0);
@@ -174,13 +174,11 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onItemClick(DialogFragment dialog, int which) {
         if (which != 2) {
-            Evento eventoSel= listaEventosDia.get(itemSel);
+            Evento eventoSel = listaEventosDia.get(itemSel);
             String acao = which == 0 ? "N" : "R";
-            StringBuilder sbUrl = new StringBuilder(Config.getStatusEvento());
-            sbUrl.append(eventoSel.getData()).append("/").append(eventoSel.getApto()).append("/").append(eventoSel.getBloco()).append("/").append(acao);
-
+            final String url = new CondominioController(this).getUrlStatusEvento(eventoSel.getData(), eventoSel.getApto(), eventoSel.getBloco(), acao);
             RequestQueue queue = Volley.newRequestQueue(this);
-            JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, sbUrl.toString(), null,
+            JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
@@ -239,10 +237,13 @@ public class MainActivity extends AppCompatActivity
             this.startActivity(i);
 
         } else if (id == R.id.nav_login) {
-            Intent i = new Intent(this, LoginActivity.class);
-            this.startActivity(i);
-        } else if (id == R.id.nav_slideshow) {
-
+            CondominioController condominioController = new CondominioController(this);
+            if (condominioController.isLogedIn())
+                condominioController.logout();
+            else {
+                Intent i = new Intent(this, LoginActivity.class);
+                this.startActivity(i);
+            }
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

@@ -26,7 +26,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-import br.com.gerson.mobile.condominio.model.Config;
+import br.com.gerson.mobile.condominio.controller.CondominioController;
 import br.com.gerson.mobile.condominio.model.Evento;
 
 public class PendentesActivity extends AppCompatActivity implements PendenteDialog.PendenteDialogListener {
@@ -46,7 +46,8 @@ public class PendentesActivity extends AppCompatActivity implements PendenteDial
 
     private void getPendentes() {
         RequestQueue queue = Volley.newRequestQueue(this);
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, Config.getPendentes(), null, new Response.Listener<JSONObject>() {
+        String url = new CondominioController(this).getUrlPendentes();
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 setListaPendentes(response);
@@ -107,10 +108,11 @@ public class PendentesActivity extends AppCompatActivity implements PendenteDial
     @Override
     public void onItemClick(DialogFragment dialog, int which) {
         if (which != 2) {
-            String data = pendentes.get(itemSel).getData();
+            Evento evento = pendentes.get(itemSel);
             String acao = which == 0 ? "N" : "R";
             RequestQueue queue = Volley.newRequestQueue(this);
-            JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, Config.getStatusEvento().concat(data).concat("/").concat(acao), null,
+            String url = new CondominioController(this).getUrlStatusEvento(evento.getData(), evento.getApto(), evento.getBloco(), acao);
+            JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {

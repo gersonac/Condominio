@@ -26,7 +26,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import br.com.gerson.mobile.condominio.model.Config;
+import br.com.gerson.mobile.condominio.controller.CondominioController;
 
 public class CriaEventoActivity extends AppCompatActivity {
 
@@ -56,13 +56,12 @@ public class CriaEventoActivity extends AppCompatActivity {
         addEvento.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String evento = getEvento();
+                String descricao = getEvento();
                 String apto = spnAptos.getSelectedItem().toString();
-                StringBuilder sbUrl = new StringBuilder(Config.getSalva());
-                sbUrl.append(dataEventoYMD).append("/").append(apto).append("/").append(getBloco()).append("/").append(evento);
+                String url = new CondominioController(v.getContext()).getUrlSalva(dataEventoYMD, apto, getBloco(), descricao);
 
                 RequestQueue queue = Volley.newRequestQueue(v.getContext());
-                JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, sbUrl.toString(), null,
+                JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
                         new Response.Listener<JSONObject>() {
                             @Override
                             public void onResponse(JSONObject response) {

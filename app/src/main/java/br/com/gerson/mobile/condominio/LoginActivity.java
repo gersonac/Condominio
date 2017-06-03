@@ -27,6 +27,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import br.com.gerson.mobile.condominio.controller.CondominioController;
 import br.com.gerson.mobile.condominio.model.Config;
 
 /**
@@ -125,11 +126,10 @@ public class LoginActivity extends AppCompatActivity /* implements LoaderCallbac
     }
 
     private void doLogin(String mEmail, String mPassword) {
-        StringBuilder sbUrl = new StringBuilder(Config.getLogin());
-        sbUrl.append(mEmail).append("/").append(mPassword);
+        String url = new CondominioController(getBaseContext()).getUrlLogin(mEmail, mPassword);
 
         RequestQueue queue = Volley.newRequestQueue(getBaseContext());
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, sbUrl.toString(), null, new Response.Listener<JSONObject>() {
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 try {
@@ -166,6 +166,7 @@ public class LoginActivity extends AppCompatActivity /* implements LoaderCallbac
     private void doError() {
         mPasswordView.setError(getString(R.string.error_incorrect_password));
         mPasswordView.requestFocus();
+        showProgress(false);
     }
 
     private boolean isEmailValid(String email) {

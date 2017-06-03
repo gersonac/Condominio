@@ -48,28 +48,4 @@ public class Config extends ModelBase {
         values.put(CondominioContract.Config.COLUMN_NAME_TOKEN, getToken());
         return values;
     }
-
-    static public String getEndereco() {
-        return "http://192.168.0.4:8080";
-    }
-
-    static public String getConsulta() {
-        return getEndereco().concat("/datasnap/rest/TServerMethods1/consulta/");
-    }
-
-    static public String getSalva() {
-        return getEndereco().concat("/datasnap/rest/TServerMethods1/salva/");
-    }
-
-    static public String getPendentes() {
-        return getEndereco().concat("/datasnap/rest/TServerMethods1/pendentes");
-    }
-
-    static public String getStatusEvento() {
-        return getEndereco().concat("/datasnap/rest/TServerMethods1/statusevento/");
-    }
-
-    static public String getLogin() {
-        return getEndereco().concat("/datasnap/rest/TServerMethods1/login/");
-    }
 }
