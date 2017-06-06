@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 
 public class CondominioSQLiteOpenHelper extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 3;
     public static final String DATABASE_NAME = "condominio.db";
 
     public CondominioSQLiteOpenHelper(Context context) {
@@ -23,6 +23,14 @@ public class CondominioSQLiteOpenHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        if (newVersion <= 2)
+            db.execSQL("alter table " + CondominioContract.Config.TABLE_NAME +
+                    " add " + CondominioContract.Config.COLUMN_NAME_TIPO + " varchar(1) ");
+        if (newVersion <= 3) {
+            db.execSQL("alter table " + CondominioContract.Config.TABLE_NAME +
+                    " add " + CondominioContract.Config.COLUMN_NAME_APTO + " VARCHAR(4)");
+            db.execSQL("alter table " + CondominioContract.Config.TABLE_NAME +
+                    " add " + CondominioContract.Config.COLUMN_NAME_BLOCO + " VARCHAR(1)");
+        }
     }
 }

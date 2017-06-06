@@ -107,11 +107,12 @@ public class PendentesActivity extends AppCompatActivity implements PendenteDial
 
     @Override
     public void onItemClick(DialogFragment dialog, int which) {
-        if (which != 2) {
+        if (which < 3) {
+            CondominioController condominioController = new CondominioController(this);
             Evento evento = pendentes.get(itemSel);
-            String acao = which == 0 ? "N" : "R";
+            String acao = condominioController.getAcao(which, true);
             RequestQueue queue = Volley.newRequestQueue(this);
-            String url = new CondominioController(this).getUrlStatusEvento(evento.getData(), evento.getApto(), evento.getBloco(), acao);
+            String url = condominioController.getUrlStatusEvento(evento.getData(), evento.getApto(), evento.getBloco(), acao);
             JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
                     new Response.Listener<JSONObject>() {
                         @Override

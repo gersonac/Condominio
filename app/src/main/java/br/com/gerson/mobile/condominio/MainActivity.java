@@ -70,7 +70,14 @@ public class MainActivity extends AppCompatActivity
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+                CondominioController condominioController = new CondominioController(drawerView.getContext());
+                handleMenuDrawer();
+                super.onDrawerSlide(drawerView, slideOffset);
+            }
+        };
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
@@ -123,8 +130,12 @@ public class MainActivity extends AppCompatActivity
                 TextView text1 = (TextView) view.findViewById(android.R.id.text1);
                 TextView text2 = (TextView) view.findViewById(android.R.id.text2);
 
-                text1.setText(lista.get(position).toString());
-                text2.setText(lista.get(position).getStatus());
+                Evento evento = lista.get(position);
+                text1.setText(evento.toString());
+                String status = evento.getStatusDescricao();
+                if (evento.getStatus().equals(CondominioController.CANCELADO))
+                    status = status.concat("(").concat(evento.getDataCancel()).concat(")");
+                text2.setText(status);
                 return view;
             }
         };
@@ -173,24 +184,32 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onItemClick(DialogFragment dialog, int which) {
-        if (which != 2) {
-            Evento eventoSel = listaEventosDia.get(itemSel);
-            String acao = which == 0 ? "N" : "R";
-            final String url = new CondominioController(this).getUrlStatusEvento(eventoSel.getData(), eventoSel.getApto(), eventoSel.getBloco(), acao);
-            RequestQueue queue = Volley.newRequestQueue(this);
-            JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
-                    new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            setListaEventosDia(listaEventosDia);
-                        }
-                    }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
+        Evento eventoSel = listaEventosDia.get(itemSel);
+        CondominioController condominioController = new CondominioController(this);
+        Boolean isOwner = condominioController.isOwner(eventoSel.getApto(), eventoSel.getBloco());
+        Boolean isAdmin = condominioController.isAdmin();
 
-                }
-            });
-            queue.add(request);
+        if ((which < 3 && isAdmin) || (which < 1 && !isAdmin)) {
+            if ((!isAdmin && isOwner) || isAdmin) {
+                String acao = condominioController.getAcao(which, isAdmin);
+                final String url = condominioController.getUrlStatusEvento(eventoSel.getData(),
+                        eventoSel.getApto(), eventoSel.getBloco(), acao);
+                RequestQueue queue = Volley.newRequestQueue(this);
+                JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                setListaEventosDia(listaEventosDia);
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                });
+                queue.add(request);
+            } else
+                Toast.makeText(this, "Só é possível cancelar sua própria reserva", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -202,28 +221,6 @@ public class MainActivity extends AppCompatActivity
         } else {
             super.onBackPressed();
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -238,9 +235,9 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_login) {
             CondominioController condominioController = new CondominioController(this);
-            if (condominioController.isLogedIn())
+            if (condominioController.isLoggedIn()) {
                 condominioController.logout();
-            else {
+            } else {
                 Intent i = new Intent(this, LoginActivity.class);
                 this.startActivity(i);
             }
@@ -249,5 +246,18 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void handleMenuDrawer() {
+        CondominioController condominioController = new CondominioController(this);
+        Boolean isLoggedIn = condominioController.isLoggedIn();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        Menu menu = navigationView.getMenu();
+        MenuItem menuItem = menu.findItem(R.id.nav_login);
+        String textoMenuItem = isLoggedIn ? "Sair" : "Entrar";
+        menuItem.setTitle(textoMenuItem);
+        MenuItem menuItemPendentes = menu.findItem(R.id.nav_pendentes);
+        menuItemPendentes.setVisible(isLoggedIn && condominioController.isAdmin());
     }
 }

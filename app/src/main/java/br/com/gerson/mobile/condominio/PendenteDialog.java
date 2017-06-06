@@ -7,6 +7,8 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
+import br.com.gerson.mobile.condominio.controller.CondominioController;
+
 /**
  * Created by gerson on 30/05/2017.
  */
@@ -31,8 +33,10 @@ public class PendenteDialog extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        CondominioController condominioController = new CondominioController(getActivity());
+        int opcoes_array = condominioController.isAdmin() ? R.array.opcoes_admin : R.array.opcoes_normal;
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(R.string.title_pendentes_dialog).setItems(R.array.pendentes_array, new DialogInterface.OnClickListener() {
+        builder.setTitle(R.string.title_pendentes_dialog).setItems(opcoes_array, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 listener.onItemClick(PendenteDialog.this, which);

@@ -7,6 +7,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import br.com.gerson.mobile.condominio.controller.CondominioController;
+
 /**
  * Created by gerson on 18/05/2017.
  */
@@ -16,18 +18,16 @@ public class Evento {
     private String descricao;
     private String apto;
     private String bloco;
-    private String pendente;
+    private String status;
+    private String dataCancel;
 
     public Evento() {
         this.data = "";
         this.apto = "";
         this.bloco = "";
         this.descricao = "";
-        this.pendente = "";
-    }
-    public Evento(String data, String descricao) {
-        this.data = data;
-        this.descricao = descricao;
+        this.status = "";
+        this.dataCancel = "";
     }
 
     public void parseJSON(JSONObject obj) {
@@ -35,7 +35,8 @@ public class Evento {
         this.apto = obj.optString("apto");
         this.bloco = obj.optString("bloco");
         this.descricao = obj.optString("descricao");
-        this.pendente = obj.optString("pendente");
+        this.status = obj.optString("status");
+        this.dataCancel = obj.optString("data_cancel");
     }
 
     @Override
@@ -57,12 +58,14 @@ public class Evento {
         }
     }
 
-    public String getStatus() {
+    public String getStatusDescricao() {
         String status = null;
-        if (getPendente().equals("R"))
+        if (getStatus().equals(CondominioController.REJEITADO))
             status = "Rejeitado";
-        else if (getPendente().equals("N"))
+        else if (getStatus().equals(CondominioController.RESERVADO))
             status = "Reservado";
+        else if (getStatus().equals(CondominioController.CANCELADO))
+            status = "Cancelado";
         else
             status = "Pendente";
         return status;
@@ -100,11 +103,19 @@ public class Evento {
         this.bloco = bloco;
     }
 
-    public String getPendente() {
-        return pendente;
+    public String getStatus() {
+        return status;
     }
 
-    public void setPendente(String pendente) {
-        this.pendente = pendente;
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getDataCancel() {
+        return dataCancel;
+    }
+
+    public void setDataCancel(String dataCancel) {
+        this.dataCancel = dataCancel;
     }
 }

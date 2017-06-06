@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
@@ -141,10 +142,14 @@ public class LoginActivity extends AppCompatActivity /* implements LoaderCallbac
                     if (result) {
                         boolean exist = config.find(1);
                         config.setToken(obj.optString("token"));
+                        config.setTipo(obj.optString("tipo"));
+                        config.setApto(obj.optString("apto"));
+                        config.setBloco(obj.optString("bloco"));
                         if (exist)
                             config.update();
                         else
                             config.save();
+                        setResult(RESULT_OK);
                         finish();
                     } else {
                         doError();

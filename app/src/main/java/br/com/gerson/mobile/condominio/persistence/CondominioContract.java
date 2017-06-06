@@ -12,10 +12,16 @@ public final class CondominioContract {
     public  static class Config implements BaseColumns {
         public static final String TABLE_NAME = "config";
         public static final String COLUMN_NAME_TOKEN = "token";
+        public static final String COLUMN_NAME_TIPO = "tipo";
+        public static final String COLUMN_NAME_APTO = "apto";
+        public static final String COLUMN_NAME_BLOCO = "bloco";
     }
 
     public static final String CREATE_CONFIG =
             "CREATE TABLE " + Config.TABLE_NAME + " ( " +
                     Config._ID + " INTEGER PRIMARY KEY," +
-                    Config.COLUMN_NAME_TOKEN + " VARCHAR(100) )";
+                    Config.COLUMN_NAME_TOKEN + " VARCHAR(100)," +
+                    Config.COLUMN_NAME_TIPO + " VARCHAR(1)," +
+                    Config.COLUMN_NAME_APTO + " VARCHAR(4)," +
+                    Config.COLUMN_NAME_BLOCO + " VARCHAR(1))";
 }

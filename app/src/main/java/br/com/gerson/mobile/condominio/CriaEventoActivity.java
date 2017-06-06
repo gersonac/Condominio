@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import br.com.gerson.mobile.condominio.controller.CondominioController;
+import br.com.gerson.mobile.condominio.model.Config;
 
 public class CriaEventoActivity extends AppCompatActivity {
 
@@ -41,16 +42,7 @@ public class CriaEventoActivity extends AppCompatActivity {
         String dataEvento = getIntent().getStringExtra("data");
         dataEventoYMD = getIntent().getStringExtra("dataYMD");
 
-        TextView data = (TextView) this.findViewById(R.id.tvData);
-        data.setText(dataEvento);
-
-        ArrayAdapter<String> aptosAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, getListaAptos());
-        spnAptos = (Spinner) this.findViewById(R.id.spnAp);
-        spnAptos.setAdapter(aptosAdapter);
-
-        ArrayAdapter<String> tiposAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, getTiposEventos());
-        spnTipoEventos = (Spinner) this.findViewById(R.id.spnTipoEvento);
-        spnTipoEventos.setAdapter(tiposAdapter);
+        setControls(dataEvento);
 
         Button addEvento = (Button) this.findViewById(R.id.btnAddEvento);
         addEvento.setOnClickListener(new View.OnClickListener() {
@@ -58,7 +50,8 @@ public class CriaEventoActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String descricao = getEvento();
                 String apto = spnAptos.getSelectedItem().toString();
-                String url = new CondominioController(v.getContext()).getUrlSalva(dataEventoYMD, apto, getBloco(), descricao);
+                CondominioController condominio = new CondominioController(v.getContext());
+                String url = condominio.getUrlSalva(dataEventoYMD, apto, getBloco(), descricao);
 
                 RequestQueue queue = Volley.newRequestQueue(v.getContext());
                 JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
@@ -79,6 +72,19 @@ public class CriaEventoActivity extends AppCompatActivity {
                 queue.add(request);
             }
         });
+    }
+
+    private void setControls(String dataEvento) {
+        TextView data = (TextView) this.findViewById(R.id.tvData);
+        data.setText(dataEvento);
+
+        ArrayAdapter<String> aptosAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, getListaAptos());
+        spnAptos = (Spinner) this.findViewById(R.id.spnAp);
+        spnAptos.setAdapter(aptosAdapter);
+
+        ArrayAdapter<String> tiposAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, getTiposEventos());
+        spnTipoEventos = (Spinner) this.findViewById(R.id.spnTipoEvento);
+        spnTipoEventos.setAdapter(tiposAdapter);
     }
 
     private String getBloco() {
