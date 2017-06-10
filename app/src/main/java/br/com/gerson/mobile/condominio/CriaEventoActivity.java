@@ -1,5 +1,7 @@
 package br.com.gerson.mobile.condominio;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -128,6 +130,7 @@ public class CriaEventoActivity extends AppCompatActivity {
         try {
             JSONArray jsonArray = obj.getJSONArray("result");
             JSONObject mensagem = jsonArray.getJSONObject(0);
+            String status = mensagem.getString("status");
             return mensagem.getString("mensagem");
         } catch (JSONException e) {
             e.printStackTrace();
@@ -143,5 +146,17 @@ public class CriaEventoActivity extends AppCompatActivity {
         tipos.add("Evento de vendas");
         tipos.add("Festa de 15 anos");
         return tipos;
+    }
+
+    private void sendEmail() {
+        String[] addresses = {"gersonac@gmail.com"};
+        String subject = "Cadastro de Evento";
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("mailto:")); // only email apps should handle this
+        intent.putExtra(Intent.EXTRA_EMAIL, addresses);
+        intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
     }
 }

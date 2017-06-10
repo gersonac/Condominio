@@ -20,4 +20,5 @@
     <string name="title_pendentes_dialog">O que deseja fazer com esse evento?</string>
     <string name="menu_logout">Login</string>
     <string name="menu_login">Sair</string>
+    <string name="action_create_in">Criar Usuário</string>
 </resources>

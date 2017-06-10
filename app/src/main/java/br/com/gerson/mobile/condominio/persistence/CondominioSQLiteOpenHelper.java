@@ -26,11 +26,5 @@ public class CondominioSQLiteOpenHelper extends SQLiteOpenHelper {
         if (newVersion <= 2)
             db.execSQL("alter table " + CondominioContract.Config.TABLE_NAME +
                     " add " + CondominioContract.Config.COLUMN_NAME_TIPO + " varchar(1) ");
-        if (newVersion <= 3) {
-            db.execSQL("alter table " + CondominioContract.Config.TABLE_NAME +
-                    " add " + CondominioContract.Config.COLUMN_NAME_APTO + " VARCHAR(4)");
-            db.execSQL("alter table " + CondominioContract.Config.TABLE_NAME +
-                    " add " + CondominioContract.Config.COLUMN_NAME_BLOCO + " VARCHAR(1)");
-        }
     }
 }

@@ -20,6 +20,7 @@ public class Evento {
     private String bloco;
     private String status;
     private String dataCancel;
+    private String token;
 
     public Evento() {
         this.data = "";
@@ -28,6 +29,7 @@ public class Evento {
         this.descricao = "";
         this.status = "";
         this.dataCancel = "";
+        this.token = "";
     }
 
     public void parseJSON(JSONObject obj) {
@@ -37,6 +39,7 @@ public class Evento {
         this.descricao = obj.optString("descricao");
         this.status = obj.optString("status");
         this.dataCancel = obj.optString("data_cancel");
+        this.token = obj.optString("token");
     }
 
     @Override
@@ -117,5 +120,13 @@ public class Evento {
 
     public void setDataCancel(String dataCancel) {
         this.dataCancel = dataCancel;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

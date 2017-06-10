@@ -43,7 +43,6 @@ import br.com.gerson.mobile.condominio.model.Evento;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, PendenteDialog.PendenteDialogListener {
 
-    CalendarView calendarView;
     private Integer day;
     private Integer month;
     private Integer year;
@@ -73,7 +72,6 @@ public class MainActivity extends AppCompatActivity
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
-                CondominioController condominioController = new CondominioController(drawerView.getContext());
                 handleMenuDrawer();
                 super.onDrawerSlide(drawerView, slideOffset);
             }
@@ -84,17 +82,31 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        calendarView = (CalendarView) this.findViewById(R.id.calendarView);
+        CalendarView calendarView = (CalendarView) this.findViewById(R.id.calendarView);
         calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
             @Override
             public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
                 onEscolheData(year, month, dayOfMonth);
             }
         });
+        calendarVisible();
 
         this.day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
         this.month = Calendar.getInstance().get(Calendar.MONTH);
         this.year = Calendar.getInstance().get(Calendar.YEAR);
+    }
+
+    private void calendarVisible() {
+        CalendarView calendarView = (CalendarView) this.findViewById(R.id.calendarView);
+        ListView lvEventosDia = (ListView) this.findViewById(R.id.lv_evento_dia);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+
+        CondominioController condominioController = new CondominioController(this);
+        int isVisible = condominioController.isLoggedIn() ? View.VISIBLE : View.INVISIBLE;
+
+        calendarView.setVisibility(isVisible);
+        lvEventosDia.setVisibility(isVisible);
+        fab.setVisibility(isVisible);
     }
 
     private void onEscolheData(int year, int month, int dayOfMonth) {
@@ -114,7 +126,7 @@ public class MainActivity extends AppCompatActivity
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getApplicationContext(), error.toString(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Verifique a conexão com a internet", Toast.LENGTH_SHORT).show();
             }
         }
         );
@@ -186,7 +198,7 @@ public class MainActivity extends AppCompatActivity
     public void onItemClick(DialogFragment dialog, int which) {
         Evento eventoSel = listaEventosDia.get(itemSel);
         CondominioController condominioController = new CondominioController(this);
-        Boolean isOwner = condominioController.isOwner(eventoSel.getApto(), eventoSel.getBloco());
+        Boolean isOwner = condominioController.isOwner(eventoSel.getToken());
         Boolean isAdmin = condominioController.isAdmin();
 
         if ((which < 3 && isAdmin) || (which < 1 && !isAdmin)) {
@@ -259,5 +271,6 @@ public class MainActivity extends AppCompatActivity
         menuItem.setTitle(textoMenuItem);
         MenuItem menuItemPendentes = menu.findItem(R.id.nav_pendentes);
         menuItemPendentes.setVisible(isLoggedIn && condominioController.isAdmin());
+        calendarVisible();
     }
 }

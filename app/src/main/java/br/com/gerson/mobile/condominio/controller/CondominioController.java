@@ -3,6 +3,9 @@ package br.com.gerson.mobile.condominio.controller;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 import br.com.gerson.mobile.condominio.model.Config;
 
 /**
@@ -54,12 +57,8 @@ public class CondominioController {
         return result;
     }
 
-    public Boolean isOwner(String apto, String bloco) {
-        Config config = new Config(contex);
-        Boolean result = false;
-        if (config.find(1))
-            result = config.getApto().equals(apto) && config.getBloco().equals(bloco);
-        return result;
+    public Boolean isOwner(String token) {
+        return getToken().equals(token);
     }
 
     @NonNull
@@ -78,7 +77,7 @@ public class CondominioController {
     }
 
     public String getEndereco() {
-        return "http://10.1.20.164:8080";
+        return "http://192.168.0.7:8080";
     }
 
     public String getBaseUrl() {
@@ -90,7 +89,7 @@ public class CondominioController {
                 .concat(data);
     }
 
-    public String getUrlSalva(String  data, String apto, String bloco, String descricao) {
+    public String getUrlSalva(String data, String apto, String bloco, String descricao) {
         return getEndereco().concat(getBaseUrl()).concat("salva/").concat(getToken()).concat("/")
                 .concat(data).concat("/").concat(apto).concat("/").concat(bloco).concat("/").concat(descricao);
     }
@@ -106,5 +105,25 @@ public class CondominioController {
 
     public String getUrlLogin(String email, String senha) {
         return getEndereco().concat(getBaseUrl()).concat("login/").concat(email).concat("/").concat(senha);
+    }
+
+    public String getUrlNovoUsuario(String email, String senha) {
+        return getEndereco().concat(getBaseUrl()).concat("novousuario/").concat(email).concat("/").concat(senha);
+    }
+
+    public String hashMd5(String senha) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(senha.getBytes());
+            byte[] bytes = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < bytes.length; i++) {
+                sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return "";
+        }
     }
 }

@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.KeyEvent;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
@@ -51,14 +50,13 @@ public class LoginActivity extends AppCompatActivity /* implements LoaderCallbac
         setContentView(R.layout.activity_login);
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-        //populateAutoComplete();
 
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
                 if (id == R.id.nav_login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
+                    attemptLogin(true);
                     return true;
                 }
                 return false;
@@ -69,7 +67,15 @@ public class LoginActivity extends AppCompatActivity /* implements LoaderCallbac
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                attemptLogin();
+                attemptLogin(true);
+            }
+        });
+
+        Button mEmailCreateButton = (Button) findViewById(R.id.email_create_button);
+        mEmailCreateButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                attemptLogin(false);
             }
         });
 
@@ -82,7 +88,7 @@ public class LoginActivity extends AppCompatActivity /* implements LoaderCallbac
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
-    private void attemptLogin() {
+    private void attemptLogin(Boolean isLogin) {
         // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
@@ -122,54 +128,66 @@ public class LoginActivity extends AppCompatActivity /* implements LoaderCallbac
             showProgress(true);
             //mAuthTask = new UserLoginTask(email, password);
             //mAuthTask.execute((Void) null);
-            doLogin(email, password);
+            doLogin(email, password, isLogin);
         }
     }
 
-    private void doLogin(String mEmail, String mPassword) {
-        String url = new CondominioController(getBaseContext()).getUrlLogin(mEmail, mPassword);
+    private void doLogin(String mEmail, String mPassword, Boolean isLogin) {
+        CondominioController condominioController = new CondominioController(getBaseContext());
+        String senhaHashed = condominioController.hashMd5(mPassword);
+        if (!senhaHashed.isEmpty()) {
+            String url = getUrl(mEmail, isLogin, condominioController, senhaHashed);
 
-        RequestQueue queue = Volley.newRequestQueue(getBaseContext());
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    JSONArray jsonArray = response.getJSONArray("result");
-                    JSONObject obj = jsonArray.getJSONObject(0);
-                    Boolean result = obj.has("token");
-                    Config config = new Config(getBaseContext());
-                    showProgress(false);
-                    if (result) {
-                        boolean exist = config.find(1);
-                        config.setToken(obj.optString("token"));
-                        config.setTipo(obj.optString("tipo"));
-                        config.setApto(obj.optString("apto"));
-                        config.setBloco(obj.optString("bloco"));
-                        if (exist)
-                            config.update();
-                        else
-                            config.save();
-                        setResult(RESULT_OK);
-                        finish();
-                    } else {
-                        doError();
+            RequestQueue queue = Volley.newRequestQueue(getBaseContext());
+            JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    try {
+                        JSONArray jsonArray = response.getJSONArray("result");
+                        JSONObject obj = jsonArray.getJSONObject(0);
+                        Boolean result = obj.has("token");
+                        Config config = new Config(getBaseContext());
+                        showProgress(false);
+                        if (result) {
+                            boolean exist = config.find(1);
+                            config.setToken(obj.optString("token"));
+                            config.setTipo(obj.optString("tipo"));
+                            if (exist)
+                                config.update();
+                            else
+                                config.save();
+                            setResult(RESULT_OK);
+                            finish();
+                        } else {
+                            doError(obj.optString("nome"));
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        doError("Erro na resposta do sevidor");
                     }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    doError();
                 }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                doError();
-            }
-        });
-        queue.add(request);
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    doError("Verifique a conexão com a internet");
+                }
+            });
+            queue.add(request);
+        } else
+            doError("Erro ao gerar senha");
     }
 
-    private void doError() {
-        mPasswordView.setError(getString(R.string.error_incorrect_password));
+    private String getUrl(String mEmail, Boolean isLogin, CondominioController condominioController, String senhaHashed) {
+        String url = "";
+        if (isLogin)
+            url = condominioController.getUrlLogin(mEmail, senhaHashed);
+        else
+            url = condominioController.getUrlNovoUsuario(mEmail, senhaHashed);
+        return url;
+    }
+
+    private void doError(String msg) {
+        mPasswordView.setError(msg);
         mPasswordView.requestFocus();
         showProgress(false);
     }
