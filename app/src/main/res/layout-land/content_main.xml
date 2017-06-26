@@ -8,29 +8,4 @@
     tools:context="br.com.gerson.mobile.condominio.MainActivity"
     tools:showIn="@layout/app_bar_main">
 
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        tools:layout_editor_absoluteY="8dp"
-        tools:layout_editor_absoluteX="8dp">
-
-        <CalendarView
-            android:id="@+id/calendarView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|left"
-            android:layout_weight="1"
-            tools:layout_editor_absoluteX="18dp"
-            tools:layout_editor_absoluteY="16dp" />
-
-        <ListView
-            android:id="@+id/lv_evento_dia"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="top|right"
-            android:layout_weight="1"
-            android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/calendarView" />
-    </RelativeLayout>
-
 </android.support.constraint.ConstraintLayout>

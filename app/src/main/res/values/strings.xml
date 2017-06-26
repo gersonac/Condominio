@@ -4,8 +4,7 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="action_settings">Settings</string>
-    <string name="title_activity_login">Sign in</string>
+    <string name="title_activity_login">Entrar</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
@@ -21,4 +20,13 @@
     <string name="menu_logout">Login</string>
     <string name="menu_login">Sair</string>
     <string name="action_create_in">Criar Usuário</string>
+    <string name="verifique_conexao_internet">Verifique a conexão com a internet</string>
+    <string name="sair">Sair</string>
+    <string name="entrar">Entrar</string>
+    <string name="nome_condominio">Condomínio Lagoa Jóquei Ville</string>
+    <string name="action_reset_password">Esqueci a Senha</string>
+    <string name="title_activity_reserva">Reservas</string>
+    <string name="reservas">Reservas</string>
+    <string name="ckbconcorda">Concorda com os termos?</string>
+    <string name="adicionar_evento">Adicionar Evento</string>
 </resources>

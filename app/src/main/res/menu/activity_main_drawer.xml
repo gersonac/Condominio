@@ -3,6 +3,13 @@
 
     <group android:checkableBehavior="single">
         <item
+            android:id="@+id/nav_reservas"
+            android:checkable="false"
+            android:enabled="true"
+            android:icon="@android:drawable/ic_menu_my_calendar"
+            android:title="@string/reservas"
+            android:visible="true" />
+        <item
             android:id="@+id/nav_pendentes"
             android:checkable="false"
             android:enabled="true"

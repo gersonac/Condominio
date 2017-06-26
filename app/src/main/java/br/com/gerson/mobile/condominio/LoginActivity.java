@@ -15,6 +15,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -76,6 +77,29 @@ public class LoginActivity extends AppCompatActivity /* implements LoaderCallbac
             @Override
             public void onClick(View view) {
                 attemptLogin(false);
+            }
+        });
+
+        Button mEmailReserPasswordButton = (Button) findViewById(R.id.reset_passwor_button);
+        mEmailReserPasswordButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                CondominioController controller = new CondominioController(getBaseContext());
+                String email = mEmailView.getText().toString();
+
+                RequestQueue queue = Volley.newRequestQueue(getBaseContext());
+                JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, controller.getUrlResetPassword(email), null, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Toast.makeText(getBaseContext(), "Confira seu email para mudar sua senha.", Toast.LENGTH_LONG).show();
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                });
+                queue.add(request);
             }
         });
 
@@ -169,7 +193,7 @@ public class LoginActivity extends AppCompatActivity /* implements LoaderCallbac
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    doError("Verifique a conexão com a internet");
+                    doError(getString(R.string.verifique_conexao_internet));
                 }
             });
             queue.add(request);

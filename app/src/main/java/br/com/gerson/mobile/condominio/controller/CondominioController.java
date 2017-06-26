@@ -53,7 +53,7 @@ public class CondominioController {
         Config config = new Config(contex);
         Boolean result = false;
         if (config.find(1))
-            result = config.getTipo().equals(ADMIN);
+            result = config.getTipo().equals(CondominioController.ADMIN);
         return result;
     }
 
@@ -77,7 +77,8 @@ public class CondominioController {
     }
 
     public String getEndereco() {
-        return "http://192.168.0.7:8080";
+        //return "http://192.168.0.7:8080";
+        return "http://ec2-13-59-11-176.us-east-2.compute.amazonaws.com:8080";
     }
 
     public String getBaseUrl() {
@@ -109,6 +110,10 @@ public class CondominioController {
 
     public String getUrlNovoUsuario(String email, String senha) {
         return getEndereco().concat(getBaseUrl()).concat("novousuario/").concat(email).concat("/").concat(senha);
+    }
+
+    public String getUrlResetPassword(String email) {
+        return getEndereco().concat(getBaseUrl()).concat("resetsenha/").concat(email);
     }
 
     public String hashMd5(String senha) {
