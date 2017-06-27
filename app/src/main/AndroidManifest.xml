@@ -25,6 +25,7 @@
         <activity
             android:name=".CriaEventoActivity"
             android:parentActivityName=".ReservaActivity"
+            android:label="@string/title_activity_cria_evento"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".LoginActivity"
@@ -32,6 +33,7 @@
         <activity
             android:name=".PendentesActivity"
             android:label="@string/title_activity_pendentes"
+            android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ReservaActivity"

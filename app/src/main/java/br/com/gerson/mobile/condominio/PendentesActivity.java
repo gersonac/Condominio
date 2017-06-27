@@ -41,6 +41,7 @@ public class PendentesActivity extends AppCompatActivity implements PendenteDial
         setContentView(R.layout.activity_pendentes);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         getPendentes();
     }

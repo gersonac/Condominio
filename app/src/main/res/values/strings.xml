@@ -29,4 +29,5 @@
     <string name="reservas">Reservas</string>
     <string name="ckbconcorda">Concorda com os termos?</string>
     <string name="adicionar_evento">Adicionar Evento</string>
+    <string name="title_activity_cria_evento">Criar Evento</string>
 </resources>
