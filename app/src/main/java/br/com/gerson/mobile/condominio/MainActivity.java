@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_reservas) {
-            Intent i = new Intent(this, ReservaActivity.class);
+            Intent i = new Intent(this, ReservasActivity.class);
             this.startActivity(i);
         } else if (id == R.id.nav_pendentes) {
             Intent i = new Intent(this, PendentesActivity.class);
