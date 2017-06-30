@@ -90,6 +90,11 @@ public class CondominioController {
                 .concat(data);
     }
 
+    public String getUrlConsultaMes(String mes) {
+        return getEndereco().concat(getBaseUrl()).concat("consultames/").concat(getToken()).concat("/")
+                .concat(mes);
+    }
+
     public String getUrlSalva(String data, String apto, String bloco, String descricao) {
         return getEndereco().concat(getBaseUrl()).concat("salva/").concat(getToken()).concat("/")
                 .concat(data).concat("/").concat(apto).concat("/").concat(bloco).concat("/").concat(descricao);

@@ -38,4 +38,16 @@
         app:compactCalendarCurrentSelectedDayBackgroundColor="@color/colorPrimary"
         app:compactCalendarCurrentSelectedDayIndicatorStyle="no_fill_large_indicator"/>
 
+    <ListView
+        android:id="@+id/lv_evento_dia"
+        android:layout_width="wrap_content"
+        android:layout_height="188dp"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/compactcalendar_view"
+        android:layout_gravity="bottom|fill_horizontal"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/compactcalendar_view"
+        tools:layout_editor_absoluteX="4dp" />
+
 </android.support.constraint.ConstraintLayout>
