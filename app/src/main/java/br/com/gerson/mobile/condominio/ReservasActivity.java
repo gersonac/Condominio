@@ -73,6 +73,8 @@ public class ReservasActivity extends AppCompatActivity implements PendenteDialo
 
         calendar = (CompactCalendarView) this.findViewById(R.id.compactcalendar_view);
         getEventosMes(Calendar.getInstance().getTime());
+        calendar.shouldDrawIndicatorsBelowSelectedDays(true);
+        calendar.shouldSelectFirstDayOfMonthOnScroll(false);
         calendar.setListener(new CompactCalendarView.CompactCalendarViewListener() {
             @Override
             public void onDayClick(Date dateClicked) {
@@ -86,7 +88,6 @@ public class ReservasActivity extends AppCompatActivity implements PendenteDialo
                 TextView mes = (TextView) findViewById(R.id.mes_atual);
                 mes.setText(formataData(firstDayOfNewMonth));
                 getEventosMes(firstDayOfNewMonth);
-                //onEscolheData(firstDayOfNewMonth);
                 setListaEventosDia(new ArrayList<Evento>());
             }
         });
