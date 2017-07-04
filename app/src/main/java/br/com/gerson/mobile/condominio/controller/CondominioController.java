@@ -78,7 +78,7 @@ public class CondominioController {
 
     public String getEndereco() {
         //return "http://192.168.0.7:8080";
-        return "http://ec2-13-59-11-176.us-east-2.compute.amazonaws.com:8080";
+        return "http://ec2-13-58-16-14.us-east-2.compute.amazonaws.com:8080";
     }
 
     public String getBaseUrl() {

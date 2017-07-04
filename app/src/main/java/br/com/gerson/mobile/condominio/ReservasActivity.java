@@ -2,7 +2,6 @@ package br.com.gerson.mobile.condominio;
 
 import android.app.DialogFragment;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -30,7 +29,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -39,6 +37,7 @@ import java.util.Locale;
 
 import br.com.gerson.mobile.condominio.controller.CondominioController;
 import br.com.gerson.mobile.condominio.model.Evento;
+import br.com.gerson.mobile.condominio.util.JSONUtil;
 
 public class ReservasActivity extends AppCompatActivity implements PendenteDialog.PendenteDialogListener{
     private CompactCalendarView calendar;
@@ -101,35 +100,15 @@ public class ReservasActivity extends AppCompatActivity implements PendenteDialo
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, controller.getUrlConsultaMes(mes), null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
-                JSONArray result = null;
-                try {
-                    calendar.removeAllEvents();
-                    result = response.getJSONArray("result");
-                    JSONObject obj1 = result.getJSONObject(0);
-                    String mes = obj1.optString("mes");
-                    SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
-                    Date dataCal = df.parse(mes.concat("01"));
-                    JSONArray dias = obj1.getJSONArray("dias");
-                    for (int i = 0; i < dias.length(); i++) {
-                        JSONObject obj = dias.getJSONObject(i);
-                        int dia = obj.optInt("dia");
-                        Calendar cal = Calendar.getInstance();
-                        cal.setTime(dataCal);
-                        cal.set(Calendar.DAY_OF_MONTH, dia);
-                        Event event = new Event(Color.BLUE, cal.getTimeInMillis());
-                        calendar.addEvent(event, false);
-                    }
-                    calendar.invalidate();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
+                ArrayList<Event> eventos = JSONUtil.getEventosMes(response);
+                calendar.removeAllEvents();
+                calendar.addEvents(eventos);
+                calendar.invalidate();
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-
+                Toast.makeText(getApplicationContext(), getString(R.string.verifique_conexao_internet), Toast.LENGTH_SHORT).show();
             }
         });
         queue.add(request);
