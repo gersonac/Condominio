@@ -47,6 +47,6 @@
         android:layout_below="@+id/compactcalendar_view"
         android:layout_gravity="bottom|fill_horizontal"
         app:layout_constraintTop_toBottomOf="@+id/compactcalendar_view"
-        tools:layout_editor_absoluteX="4dp" />
+        tools:layout_editor_absoluteX="4dp"/>
 
 </android.support.constraint.ConstraintLayout>

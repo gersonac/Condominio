@@ -9,13 +9,20 @@
     tools:showIn="@layout/activity_cria_evento">
 
     <LinearLayout
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
         android:layout_margin="12dp"
         android:orientation="vertical"
         android:padding="8dp"
         tools:layout_editor_absoluteX="8dp"
-        tools:layout_editor_absoluteY="8dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        tools:layout_editor_absoluteY="8dp">
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="Data" />
 
         <TextView
             android:id="@+id/tvData"
@@ -28,8 +35,8 @@
             android:id="@+id/textView3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingTop="8dp"
-            android:text="Bloco" />
+            android:padding="8dp"
+            android:text="Torre" />
 
         <RadioGroup
             android:id="@+id/rgBloco"
@@ -66,7 +73,7 @@
             android:id="@+id/textView4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingTop="8dp"
+            android:padding="8dp"
             android:text="Apartamento" />
 
         <Spinner
@@ -78,7 +85,7 @@
             android:id="@+id/textView5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingTop="8dp"
+            android:padding="8dp"
             android:text="Tipo de Evento" />
 
         <Spinner
@@ -86,14 +93,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
-        <Button
-            android:id="@+id/btnAddEvento"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/adicionar_evento"
-            android:textAllCaps="false" />
-
     </LinearLayout>
+
+    <Button
+        android:id="@+id/btnAddEvento"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginRight="8dp"
+        android:text="@string/adicionar_evento"
+        android:textAllCaps="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginEnd="8dp" />
 
 </android.support.constraint.ConstraintLayout>
